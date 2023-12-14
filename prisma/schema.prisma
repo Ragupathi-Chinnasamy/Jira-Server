@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        Int       @id @default(autoincrement())
+  role      String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  users     User[]
+}
+
+model User {
+  id               Int            @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  email            String         @unique
+  mobile           String         @unique
+  roleId           Int
+  role             Role           @relation(fields: [roleId], references: [id])
+  token            String?
+  createdUserId    Int?
+  createdByUser    User?          @relation("createdBy", fields: [createdUserId], references: [id])
+  modifiedUserId   Int?
+  modifiedByUser   User?          @relation("modifiedBy", fields: [modifiedUserId], references: [id])
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
+  userPasswords    UserPassword[]
+  createdUsers     User[]         @relation("createdBy")
+  modifiedUsers    User[]         @relation("modifiedBy")
+  createdProjects  Project[]      @relation("createdProjects")
+  modifiedProjects Project[]      @relation("modifiedProjects")
+  createdTasks     Task[]         @relation("createdTasks")
+  modifiedTasks    Task[]         @relation("modifiedTasks")
+  tasks            TaskAssignee[]
+}
+
+model UserPassword {
+  id        Int       @id @default(autoincrement())
+  password  String
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Project {
+  id             Int       @id @default(autoincrement())
+  title          String
+  description    String
+  createdUserId  Int
+  createdUser    User      @relation("createdProjects", fields: [createdUserId], references: [id])
+  modifiedUserId Int?
+  modifiedUser   User?     @relation("modifiedProjects", fields: [modifiedUserId], references: [id])
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  tasks          Task[]
+}
+
+model TaskType {
+  id        Int       @id @default(autoincrement())
+  type      String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  tasks     Task[]
+}
+
+model TaskStatus {
+  id        Int       @id @default(autoincrement())
+  status    String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  tasks     Task[]
+}
+
+model Task {
+  id             Int            @id @default(autoincrement())
+  title          String
+  description    String
+  projectId      Int
+  project        Project        @relation(fields: [projectId], references: [id])
+  typeId         Int
+  type           TaskType       @relation(fields: [typeId], references: [id])
+  statusId       Int
+  status         TaskStatus     @relation(fields: [statusId], references: [id])
+  createdUserId  Int?
+  createdByUser  User?          @relation("createdTasks", fields: [createdUserId], references: [id])
+  modifiedUserId Int?
+  modifiedByUser User?          @relation("modifiedTasks", fields: [modifiedUserId], references: [id])
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+  taskAssignees  TaskAssignee[]
+  taskImages     TaskImage[]
+}
+
+model TaskAssignee {
+  id        Int       @id @default(autoincrement())
+  taskId    Int
+  task      Task      @relation(fields: [taskId], references: [id])
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model TaskImage {
+  id        Int       @id @default(autoincrement())
+  image     String
+  taskId    Int
+  task      Task      @relation(fields: [taskId], references: [id])
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
